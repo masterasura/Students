@@ -1,0 +1,11 @@
+/target/
+/bin/
+*.class
+*.jar
+
+# Local image folders are not referenced by the current source code.
+/img/
+/src_img/
+
+.DS_Store
+Thumbs.db
