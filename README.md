@@ -56,37 +56,30 @@ set them in the run configuration before launching `com.mycompany.students.Main`
 
 ## Share and collaborate on GitHub
 
-1. Create an empty GitHub repository. Choose **Private** if the project or its
-   history includes student or other personal information.
-2. In this project folder, initialize Git and review what will be uploaded:
+This project is shared in the GitHub repository
+[`masterasura/Students`](https://github.com/masterasura/Students). To upload your
+local changes from GitHub Desktop:
+
+1. Open the cloned `Students` repository in GitHub Desktop and review the
+   **Changes** list. Do not include generated build output or personal data.
+2. Enter a short summary, such as `Add student management project`, and click
+   **Commit to main**.
+3. Click **Push origin**. Refresh the repository page on GitHub to verify the
+   files were uploaded.
+
+The clone already has its Git remote configured; do not run `git init` or
+`git remote add origin` in this folder.
+
+Groupmates can clone the repository, set up their own database and environment
+variables, and run the app:
 
    ```powershell
-   git init
-   git add .
-   git status
+   git clone https://github.com/masterasura/Students.git
+   cd Students
    ```
 
-   Confirm the staged files contain source code, `pom.xml`, this README, and the
-   database setup script—not generated output, local image folders, or personal
-   data. Then make the first commit and connect the empty GitHub repository:
-
-   ```powershell
-   git commit -m "Prepare student management project"
-   git branch -M main
-   git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
-   git push -u origin main
-   ```
-
-3. Groupmates can clone the repository, set up their own database and
-   environment variables, and run the app:
-
-   ```powershell
-   git clone https://github.com/YOUR-USERNAME/YOUR-REPOSITORY.git
-   cd YOUR-REPOSITORY
-   ```
-
-4. For shared changes, each groupmate should create a feature branch, push it,
-   and open a pull request rather than committing directly to `main`:
+For shared changes, each groupmate should create a feature branch, push it, and
+open a pull request rather than committing directly to `main`:
 
    ```powershell
    git switch -c feature/short-description
@@ -96,8 +89,10 @@ set them in the run configuration before launching `com.mycompany.students.Main`
    git push -u origin feature/short-description
    ```
 
-   Replace `feature/short-description` with a unique branch name. Review and
-   merge the pull request on GitHub when the group is ready.
+Replace `feature/short-description` with a unique branch name. Review and merge
+the pull request on GitHub when the group is ready. Because the repository is
+private, invite groupmates as collaborators in the repository's **Settings**
+before asking them to clone it.
 
 ## Notes
 
