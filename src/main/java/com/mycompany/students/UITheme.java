@@ -20,6 +20,7 @@ public final class UITheme {
     public static final Color PALE_BLUE = new Color(224, 239, 244);
     public static final Font BODY_FONT = new Font("Segoe UI", Font.PLAIN, 14);
     public static final Font LABEL_FONT = new Font("Segoe UI", Font.BOLD, 13);
+    public static final Font BUTTON_FONT = new Font("Segoe UI", Font.BOLD, 14);
     public static final Font TITLE_FONT = new Font("Segoe UI", Font.BOLD, 25);
 
     private UITheme() {
@@ -30,7 +31,7 @@ public final class UITheme {
         Font label = LABEL_FONT;
         UIManager.put("defaultFont", body);
         UIManager.put("Label.font", body);
-        UIManager.put("Button.font", label);
+        UIManager.put("Button.font", BUTTON_FONT);
         UIManager.put("TextField.font", body);
         UIManager.put("PasswordField.font", body);
         UIManager.put("TextArea.font", body);
@@ -188,7 +189,7 @@ public final class UITheme {
     }
 
     public static void styleButton(JButton button, boolean primary) {
-        button.setFont(LABEL_FONT);
+        button.setFont(BUTTON_FONT);
         button.setFocusPainted(false);
         button.setOpaque(true);
         button.setContentAreaFilled(false);

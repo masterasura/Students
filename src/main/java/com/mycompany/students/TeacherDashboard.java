@@ -4,6 +4,8 @@ package com.mycompany.students;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -133,6 +135,24 @@ public class TeacherDashboard extends JFrame {
                     .setPreferredWidth(columnWidths[column]);
         }
         table.getColumnModel().getColumn(0).setMinWidth(175);
+        table.getColumnModel().getColumn(5)
+                .setCellRenderer(new StatusButtonRenderer());
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                int viewRow = table.rowAtPoint(event.getPoint());
+                int viewColumn = table.columnAtPoint(event.getPoint());
+                if (viewRow < 0 || viewColumn < 0
+                        || table.convertColumnIndexToModel(viewColumn) != 5) {
+                    return;
+                }
+
+                table.setRowSelectionInterval(viewRow, viewRow);
+                int row = table.convertRowIndexToModel(viewRow);
+                String studentID = String.valueOf(model.getValueAt(row, 0));
+                showStatusMenu(studentID, viewRow);
+            }
+        });
         JPanel top = new JPanel(new BorderLayout(12, 0));
         top.setBackground(UITheme.SURFACE);
         top.setBorder(
@@ -343,7 +363,7 @@ public class TeacherDashboard extends JFrame {
         // BOTTOM BUTTONS
         // ==========================================
 
-        JPanel bottom = new JPanel(new GridLayout(1, 5, 8, 6));
+        JPanel bottom = new JPanel(new GridLayout(1, 6, 8, 6));
         bottom.setBackground(UITheme.SURFACE);
         bottom.setBorder(
                 BorderFactory.createMatteBorder(
@@ -351,6 +371,8 @@ public class TeacherDashboard extends JFrame {
                 )
         );
 
+        JButton addStudentButton =
+                new JButton("Add Student");
         JButton detailsButton =
                 new JButton("View Details");
         JButton attendanceActivitiesButton =
@@ -363,6 +385,7 @@ public class TeacherDashboard extends JFrame {
         JButton logoutButton =
                 new JButton("Logout");
 
+        UITheme.styleButton(addStudentButton, true);
         UITheme.styleButton(detailsButton, false);
         UITheme.styleButton(attendanceActivitiesButton, true);
         UITheme.styleButton(scheduleButton, true);
@@ -373,6 +396,7 @@ public class TeacherDashboard extends JFrame {
                 BorderFactory.createEmptyBorder(4, 12, 4, 12)
         ));
 
+        bottom.add(addStudentButton);
         bottom.add(detailsButton);
         bottom.add(attendanceActivitiesButton);
         bottom.add(scheduleButton);
@@ -388,6 +412,9 @@ public class TeacherDashboard extends JFrame {
         // BUTTON ACTIONS
         // ==========================================
 
+        addStudentButton.addActionListener(e ->
+                addStudent()
+        );
         detailsButton.addActionListener(e ->
                 viewDetails()
         );
@@ -601,33 +628,36 @@ public class TeacherDashboard extends JFrame {
         return false;
     }
 
-    private void changeStudentStatus() {
-        Student student = getSelectedStudent();
-        if (student == null) {
-            return;
-        }
+    private void showStatusMenu(String studentID, int viewRow) {
+        JPopupMenu menu = new JPopupMenu();
+        JMenuItem active = createStatusMenuItem(
+                "Active", new Color(31, 126, 71), new Color(226, 245, 233));
+        JMenuItem inactive = createStatusMenuItem(
+                "Inactive", new Color(174, 48, 55), new Color(253, 232, 233));
+        active.addActionListener(event ->
+                updateStudentStatus(studentID, "ACTIVE"));
+        inactive.addActionListener(event ->
+                updateStudentStatus(studentID, "INACTIVE"));
+        menu.add(active);
+        menu.add(inactive);
+        Rectangle cell = table.getCellRect(viewRow, 5, true);
+        menu.show(table, cell.x, cell.y + cell.height);
+    }
 
-        Object[] choices = {"Active", "Inactive", "Dropped Out"};
-        int selected = JOptionPane.showOptionDialog(
-                this,
-                "Choose the student's status:",
-                "Change Student Status",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                choices,
-                choices[0]
-        );
-        if (selected < 0) {
-            return;
-        }
+    private JMenuItem createStatusMenuItem(
+            String label,
+            Color foreground,
+            Color background) {
+        JMenuItem item = new JMenuItem(label);
+        item.setFont(UITheme.BUTTON_FONT);
+        item.setForeground(foreground);
+        item.setBackground(background);
+        item.setOpaque(true);
+        return item;
+    }
 
-        String[] statusCodes = {"ACTIVE", "INACTIVE", "DROPPED OUT"};
-        if (StudentManager.updateStudentStatus(
-                student.getStudentID(),
-                statusCodes[selected],
-                teacherName
-        )) {
+    private void updateStudentStatus(String studentID, String status) {
+        if (StudentManager.updateStudentStatus(studentID, status, teacherName)) {
             loadSectionGroups();
             loadStudents();
         } else {
@@ -661,11 +691,10 @@ public class TeacherDashboard extends JFrame {
                 new JComboBox<>(new String[]{
                         "1st Year", "2nd Year", "3rd Year", "4th Year"
                 });
-        year.setEditable(true);
+        styleYearLevelCombo(year);
         UITheme.styleField(firstName);
         UITheme.styleField(lastName);
         course.setFont(UITheme.BODY_FONT);
-        year.setFont(UITheme.BODY_FONT);
 
         JPanel panel =
                 new JPanel(
@@ -819,11 +848,10 @@ public class TeacherDashboard extends JFrame {
                 new JComboBox<>(new String[]{
                         "1st Year", "2nd Year", "3rd Year", "4th Year"
                 });
-        year.setEditable(true);
+        styleYearLevelCombo(year);
         year.setSelectedItem(student.getYearLevel());
         UITheme.styleField(name);
         course.setFont(UITheme.BODY_FONT);
-        year.setFont(UITheme.BODY_FONT);
 
         JPanel panel =
                 new JPanel(
@@ -908,6 +936,21 @@ public class TeacherDashboard extends JFrame {
                     "Student updated successfully."
             );
         }
+    }
+
+    private void styleYearLevelCombo(JComboBox<String> year) {
+        year.setEditable(false);
+        year.setFont(UITheme.BODY_FONT);
+        year.setMaximumRowCount(4);
+        year.setRenderer((list, value, index, isSelected, cellHasFocus) -> {
+            JLabel item = new JLabel(value == null ? "" : value);
+            item.setOpaque(true);
+            item.setFont(UITheme.BODY_FONT);
+            item.setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
+            item.setBackground(isSelected ? UITheme.LIGHT_TEAL : UITheme.SURFACE);
+            item.setForeground(isSelected ? UITheme.NAVY : UITheme.TEXT);
+            return item;
+        });
     }
 
     // =====================================================
@@ -1102,6 +1145,49 @@ public class TeacherDashboard extends JFrame {
             if (value != null) {
                 String code = value.toString();
                 setText(code + "  -  " + CourseCatalog.getDisplayName(code));
+            }
+            return this;
+        }
+    }
+
+    private static final class StatusButtonRenderer extends JButton
+            implements javax.swing.table.TableCellRenderer {
+
+        private StatusButtonRenderer() {
+            setFont(UITheme.BUTTON_FONT);
+            setFocusPainted(false);
+            setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
+            setOpaque(true);
+            setToolTipText("Click to change student status");
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(
+                JTable table,
+                Object value,
+                boolean selected,
+                boolean focused,
+                int row,
+                int column) {
+            String status = value == null ? "" : value.toString();
+            setText(status);
+            switch (status) {
+                case "ACTIVE":
+                    setForeground(new Color(31, 126, 71));
+                    setBackground(new Color(226, 245, 233));
+                    break;
+                case "INACTIVE":
+                    setForeground(new Color(174, 48, 55));
+                    setBackground(new Color(253, 232, 233));
+                    break;
+                case "DROPPED OUT":
+                    setForeground(new Color(139, 90, 24));
+                    setBackground(new Color(250, 239, 216));
+                    break;
+                default:
+                    setForeground(UITheme.MUTED);
+                    setBackground(UITheme.PALE_BLUE);
+                    break;
             }
             return this;
         }
